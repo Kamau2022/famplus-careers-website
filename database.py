@@ -32,25 +32,17 @@ def load_job_from_db(id):
 from sqlalchemy.exc import SQLAlchemyError
 
 def add_applications_to_db(job_id, data):
-    try:
-        with engine.connect() as conn:
-            query = text("""
-                INSERT INTO applications (job_id, full_name, email, linkedin_url, 
-                                          education, work_experience, resume_url) VALUES
-                (:job_id, :full_name, :email, :linkedin_url, :education, :work_experience, :resume_url)
-            """)
-            conn.execute(query,
-                         job_id=job_id,
-                         full_name=data['full_name'],
-                         email=data['email'],
-                         linkedin_url=data['linkedin_url'],
-                         education=data['education'],
-                         work_experience=data['work_experience'],
-                         resume_url=data['resume_url'])
-    except SQLAlchemyError as e:
-        # Handle the exception, log it, or raise it again if necessary
-        print(f"Error adding application to the database: {e}")
-        # Optionally, raise the exception again if you want to propagate it
-        # raise
-
-        
+    with engine.connect() as conn:
+        query = text("""INSERT INTO applications (job_id, full_name, email, linkedin_url, 
+                                               education, work_experience, resume_url) VALUES
+        (:job_id, :full_name, :email, :linkedin_url, :education, :work_experience, :resume_url)""")
+        conn.execute(query, {
+            'job_id': job_id,
+            'full_name': data.get('full_name'),
+            'email': data.get('email'),
+            'linkedin_url': data.get('linkedin_url'),
+            'education': data.get('education'),
+            'work_experience': data.get('work_experience'),
+            'resume_url': data.get('resume_url')
+        })
+        conn.commit()
